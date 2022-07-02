@@ -1,0 +1,14 @@
+[package]
+name = "rm1asm"
+version = "1.0.0"
+edition = "2021"
+license = "MIT OR Apache-2.0"
+
+[profile.release]
+strip = true
+
+[dependencies]
+clap = "2.33.3"
+logos = "0.12.0"
+chumsky = "0.8.0"
+ariadne = "0.1.5"

@@ -1,0 +1,17 @@
+name: main
+
+on: push
+
+jobs:
+  check:
+    name: Check rm1asm quality
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Checking
+        run: |
+          cargo check
+          cargo fmt --check
+          cargo clippy
+          cargo test
+          ./script/test.sh
