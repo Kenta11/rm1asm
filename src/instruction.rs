@@ -1,13 +1,13 @@
 pub type MachineCode = u16;
 pub type MachineAddress = u16;
 
-#[derive(Debug, Hash)]
+#[derive(Debug, Hash, PartialEq)]
 pub enum Address {
     Constant(MachineAddress),
     Unresolved { symbol_name: String, offset: i16 },
 }
 
-#[derive(Debug, Hash)]
+#[derive(Debug, Hash, PartialEq)]
 pub enum Register {
     Zero,
     One,
@@ -26,7 +26,7 @@ impl Register {
     }
 }
 
-#[derive(Debug, Hash)]
+#[derive(Debug, Hash, PartialEq)]
 pub enum Opecode1 {
     Add,
     Sub,
@@ -39,14 +39,14 @@ pub enum Opecode1 {
     Ex,
 }
 
-#[derive(Debug, Hash)]
+#[derive(Debug, Hash, PartialEq)]
 pub enum Opecode2 {
     Lc,
     Push,
     Pop,
 }
 
-#[derive(Debug, Hash)]
+#[derive(Debug, Hash, PartialEq)]
 pub enum Opecode3 {
     Sl,
     Sa,
@@ -54,21 +54,21 @@ pub enum Opecode3 {
     Bix,
 }
 
-#[derive(Debug, Hash)]
+#[derive(Debug, Hash, PartialEq)]
 pub enum Opecode4 {
     Lea,
     Lx,
     Stx,
 }
 
-#[derive(Debug, Hash)]
+#[derive(Debug, Hash, PartialEq)]
 pub enum Opecode5 {
     L,
     St,
     La,
 }
 
-#[derive(Debug, Hash)]
+#[derive(Debug, Hash, PartialEq)]
 pub enum Opecode6 {
     Bdis,
     Bp,
@@ -84,7 +84,7 @@ pub enum Opecode6 {
     Bsr,
 }
 
-#[derive(Debug, Hash)]
+#[derive(Debug, Hash, PartialEq)]
 pub enum Device {
     Cr,
     Lpt,
@@ -99,20 +99,20 @@ impl Device {
     }
 }
 
-#[derive(Debug, Hash)]
+#[derive(Debug, Hash, PartialEq)]
 pub enum Opecode7 {
     Rio,
     Wio,
 }
 
-#[derive(Debug, Hash)]
+#[derive(Debug, Hash, PartialEq)]
 pub enum Opecode8 {
     Ret,
     Nop,
     Hlt,
 }
 
-#[derive(Debug, Hash)]
+#[derive(Debug, Hash, PartialEq)]
 pub enum Instruction {
     // 15 14 13 12 11 10  9  8  7  6  5  4  3  2  1  0
     // |    op    | ra  | rb  |       constant       |

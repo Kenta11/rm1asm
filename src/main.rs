@@ -42,7 +42,8 @@ fn main() {
     // syntactic analysis
     let (ast, errs) = parser::parse(tokens);
 
-    if let Some(mut ast) = ast {
+    if errs.is_empty() {
+        let mut ast = ast.unwrap();
         // symbol resolution
         symbol::resolve_symbols(&mut ast.lines);
         let unresolved_symbols = symbol::check_unresolve_symbols(&ast.lines);
