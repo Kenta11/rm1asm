@@ -8,8 +8,7 @@
 
 ```
 $ rm1asm --help
-{{ help }}
-```
+{{ help }}```
 
 ## Installing
 

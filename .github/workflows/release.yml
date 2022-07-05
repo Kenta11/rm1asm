@@ -38,6 +38,7 @@ jobs:
             if [[ "${{ runner.os }}" == Windows ]]; then
               7z a "$assets.zip" "$assets"
             else
+              cp completions/* "$assets"
               tar zcf "$assets.tar.gz" "$assets"
             fi
             ls -lah *.*
@@ -50,7 +51,7 @@ jobs:
             dist/*.tar.gz
             dist/*.zip
 
-  build-linux-packages:
+  build-deb-packages:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -61,39 +62,16 @@ jobs:
           override: true
       - name: Create packages
         run: |
+          sudo apt install -y pandoc
+          sudo pip install jinja2 toml
+          cargo install cargo-deb
           cargo build --release
-          mkdir -p .debpkg/usr/bin
-          mkdir -p .rpmpkg/usr/bin
-          cp -p target/release/${{ env.APP_NAME }} .debpkg/usr/bin/
-          cp -p target/release/${{ env.APP_NAME }} .rpmpkg/usr/bin/
-      - uses: jiro4989/build-deb-action@v2
-        with:
-          package: ${{ env.APP_NAME }}
-          package_root: .debpkg
-          maintainer: ${{ env.MAINTAINER }}
-          version: ${{ github.ref }}
-          arch: 'amd64'
-          desc: '${{ env.DESC }}'
-      - uses: jiro4989/build-rpm-action@v2
-        with:
-          summary: '${{ env.DESC }}'
-          package: ${{ env.APP_NAME }}
-          package_root: .rpmpkg
-          maintainer: ${{ env.MAINTAINER }}
-          version: ${{ github.ref }}
-          arch: 'x86_64'
-          desc: '${{ env.DESC }}'
+          make build-documents
       - uses: actions/upload-artifact@v3
         with:
           name: artifact-deb
           path: |
-            ./*.deb
-      - uses: actions/upload-artifact@v3
-        with:
-          name: artifact-rpm
-          path: |
-            ./*.rpm
-            !./*-debuginfo-*.rpm
+            ./target/debian/*.deb
 
   create-release:
     runs-on: ubuntu-latest
@@ -172,8 +150,6 @@ jobs:
         include:
           - pkg: deb
             asset_content_type: application/vnd.debian.binary-package
-          - pkg: rpm
-            asset_content_type: application/x-rpm
     steps:
       - uses: actions/download-artifact@v3
         with:

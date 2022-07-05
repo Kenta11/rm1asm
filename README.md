@@ -19,11 +19,10 @@ FLAGS:
     -V, --version    Prints version information
 
 OPTIONS:
-    -o, --output <output>    output file name
+    -o, --output <output>    Sets output path
 
 ARGS:
     <input>    source code
-
 ```
 
 ## Installing

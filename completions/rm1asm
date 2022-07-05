@@ -1,0 +1,33 @@
+_rm1asm()
+{
+    local prev cur
+
+    _get_comp_words_by_ref -n : cur prev
+
+    case "$prev" in
+        -h|--help|-V|--version)
+            return
+            ;;
+        -o|--output)
+        COMPREPLY=( $( compgen -f -- "$cur" ) )
+            return
+            ;;
+    esac
+
+    case "$cur" in
+        --*)
+            completions=$( rm1asm --help | grep -oE ' (\-\-[[:alnum:]@-]+)' | tr -d ' ' )
+            COMPREPLY=( $( compgen -W "$completions" -- "$cur" ) )
+            ;;
+
+        -*)
+            completions=$( rm1asm --help | grep -oE ' (\-[[:alnum:]@])' | tr -d ' ' )
+            COMPREPLY=( $( compgen -W "$completions" -- "$cur" ) )
+            ;;
+
+        *)
+            _filedir
+            ;;
+    esac
+} &&
+complete -F _rm1asm rm1asm

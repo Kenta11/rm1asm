@@ -20,7 +20,7 @@ fn main() {
         .arg(Arg::with_name("input").help("source code").required(true))
         .arg(
             Arg::with_name("output")
-                .help("output file name")
+                .help("Sets output path")
                 .short("o")
                 .long("output")
                 .takes_value(true),

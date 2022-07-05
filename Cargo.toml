@@ -1,8 +1,11 @@
 [package]
 name = "rm1asm"
+description = "MICRO-1 assembler written in Rust"
+authors = ["Kenta Arai @isKenta14"]
 version = "1.0.0"
 edition = "2021"
 license = "MIT OR Apache-2.0"
+readme = "README.md"
 
 [profile.release]
 strip = true
@@ -12,3 +15,17 @@ clap = "2.33.3"
 logos = "0.12.0"
 chumsky = "0.8.0"
 ariadne = "0.1.5"
+
+[package.metadata.deb]
+name = "rm1asm"
+depends = "$auto"
+section = "utils"
+priority = "optional"
+assets = [
+    [ "target/release/rm1asm", "/usr/bin/rm1asm", "0755" ],
+    [ "target/man/rm1asm.1", "/usr/share/man/man1/rm1asm.1", "0644" ],
+    [ "completions/rm1asm", "/usr/share/bash-completion/completions/rm1asm", "0644" ],
+    [ "completions/_rm1asm", "/usr/share/zsh/site-functions/_rm1asm", "0644" ],
+    [ "LICENSE-APACHE", "/usr/share/licenses/rm1asm/LICENSE-APACHE", "0644" ],
+    [ "LICENSE-MIT", "/usr/share/licenses/rm1asm/LICENSE-MIT", "0644" ],
+]
