@@ -27,7 +27,6 @@ cargo install --git https://github.com/Kenta11/rm1asm
 
 - Windows (x64): https://github.com/Kenta11/rm1asm/releases/download/v{{ version }}/rm1asm_windows.zip
 - Linux (x64)
-    - RPM: https://github.com/Kenta11/rm1asm/releases/download/v{{ version }}/rm1asm-{{ version }}-1.el7.x86_64.rpm
     - DEB: https://github.com/Kenta11/rm1asm/releases/download/v{{ version }}/rm1asm_{{ version }}_amd64.deb
 - macOS (x64): https://github.com/Kenta11/rm1asm/releases/download/v{{ version }}/rm1asm_macos.tar.gz
 

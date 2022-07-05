@@ -8,7 +8,7 @@
 
 ```
 $ rm1asm --help
-rm1asm 1.0.0
+rm1asm 1.0.1
 MICRO-1 machine language assembler written in Rust
 
 USAGE:
@@ -40,11 +40,10 @@ cargo install --git https://github.com/Kenta11/rm1asm
 
 ### From binary
 
-- Windows (x64): https://github.com/Kenta11/rm1asm/releases/download/v1.0.0/rm1asm_windows.zip
+- Windows (x64): https://github.com/Kenta11/rm1asm/releases/download/v1.0.1/rm1asm_windows.zip
 - Linux (x64)
-    - RPM: https://github.com/Kenta11/rm1asm/releases/download/v1.0.0/rm1asm-1.0.0-1.el7.x86_64.rpm
-    - DEB: https://github.com/Kenta11/rm1asm/releases/download/v1.0.0/rm1asm_1.0.0_amd64.deb
-- macOS (x64): https://github.com/Kenta11/rm1asm/releases/download/v1.0.0/rm1asm_macos.tar.gz
+    - DEB: https://github.com/Kenta11/rm1asm/releases/download/v1.0.1/rm1asm_1.0.1_amd64.deb
+- macOS (x64): https://github.com/Kenta11/rm1asm/releases/download/v1.0.1/rm1asm_macos.tar.gz
 
 ## Reference
 

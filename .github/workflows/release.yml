@@ -38,7 +38,7 @@ jobs:
             if [[ "${{ runner.os }}" == Windows ]]; then
               7z a "$assets.zip" "$assets"
             else
-              cp completions/* "$assets"
+              cp ../completions/* "$assets"
               tar zcf "$assets.tar.gz" "$assets"
             fi
             ls -lah *.*
