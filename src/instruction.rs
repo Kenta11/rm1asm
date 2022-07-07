@@ -1,13 +1,13 @@
 pub type MachineCode = u16;
 pub type MachineAddress = u16;
 
-#[derive(Debug, Hash, PartialEq)]
-pub enum Address {
+#[derive(Clone, Debug, Hash, PartialEq)]
+pub enum Address<'a> {
     Constant(MachineAddress),
-    Unresolved { symbol_name: String, offset: i16 },
+    Unresolved { symbol_name: &'a str, offset: i16 },
 }
 
-#[derive(Debug, Hash, PartialEq)]
+#[derive(Clone, Debug, Hash, PartialEq)]
 pub enum Register {
     Zero,
     One,
@@ -26,7 +26,7 @@ impl Register {
     }
 }
 
-#[derive(Debug, Hash, PartialEq)]
+#[derive(Clone, Debug, Hash, PartialEq)]
 pub enum Opecode1 {
     Add,
     Sub,
@@ -39,14 +39,14 @@ pub enum Opecode1 {
     Ex,
 }
 
-#[derive(Debug, Hash, PartialEq)]
+#[derive(Clone, Debug, Hash, PartialEq)]
 pub enum Opecode2 {
     Lc,
     Push,
     Pop,
 }
 
-#[derive(Debug, Hash, PartialEq)]
+#[derive(Clone, Debug, Hash, PartialEq)]
 pub enum Opecode3 {
     Sl,
     Sa,
@@ -54,21 +54,21 @@ pub enum Opecode3 {
     Bix,
 }
 
-#[derive(Debug, Hash, PartialEq)]
+#[derive(Clone, Debug, Hash, PartialEq)]
 pub enum Opecode4 {
     Lea,
     Lx,
     Stx,
 }
 
-#[derive(Debug, Hash, PartialEq)]
+#[derive(Clone, Debug, Hash, PartialEq)]
 pub enum Opecode5 {
     L,
     St,
     La,
 }
 
-#[derive(Debug, Hash, PartialEq)]
+#[derive(Clone, Debug, Hash, PartialEq)]
 pub enum Opecode6 {
     Bdis,
     Bp,
@@ -84,7 +84,7 @@ pub enum Opecode6 {
     Bsr,
 }
 
-#[derive(Debug, Hash, PartialEq)]
+#[derive(Clone, Debug, Hash, PartialEq)]
 pub enum Device {
     Cr,
     Lpt,
@@ -99,21 +99,21 @@ impl Device {
     }
 }
 
-#[derive(Debug, Hash, PartialEq)]
+#[derive(Clone, Debug, Hash, PartialEq)]
 pub enum Opecode7 {
     Rio,
     Wio,
 }
 
-#[derive(Debug, Hash, PartialEq)]
+#[derive(Clone, Debug, Hash, PartialEq)]
 pub enum Opecode8 {
     Ret,
     Nop,
     Hlt,
 }
 
-#[derive(Debug, Hash, PartialEq)]
-pub enum Instruction {
+#[derive(Clone, Debug, Hash, PartialEq)]
+pub enum Instruction<'a> {
     // 15 14 13 12 11 10  9  8  7  6  5  4  3  2  1  0
     // |    op    | ra  | rb  |       constant       |
     Group1 {
@@ -149,13 +149,13 @@ pub enum Instruction {
     Group5 {
         op: Opecode5,
         rb: Register,
-        address: Address,
+        address: Address<'a>,
     },
     // 15 14 13 12 11 10  9  8  7  6  5  4  3  2  1  0
     // |         op           |       address        |
     Group6 {
         op: Opecode6,
-        address: Address,
+        address: Address<'a>,
     },
     // 15 14 13 12 11 10  9  8  7  6  5  4  3  2  1  0
     // |         op           |       address        |
@@ -170,13 +170,13 @@ pub enum Instruction {
     },
     Dc {
         value: MachineCode,
-        unresolved_symbol: Option<String>,
+        unresolved_symbol: Option<&'a str>,
     },
     Ds(u16),
     Org(MachineAddress),
 }
 
-impl Instruction {
+impl Instruction<'_> {
     pub fn code(&self) -> Option<MachineCode> {
         match self {
             Instruction::Group1 {
@@ -633,7 +633,7 @@ mod tests {
         let input = Instruction::Group6 {
             op: Opecode6::Bc,
             address: Address::Unresolved {
-                symbol_name: String::from("TEST0"),
+                symbol_name: "TEST0",
                 offset: 0,
             },
         };
@@ -647,7 +647,7 @@ mod tests {
         let input = Instruction::Group6 {
             op: Opecode6::Bnp,
             address: Address::Unresolved {
-                symbol_name: String::from("TEST1"),
+                symbol_name: "TEST1",
                 offset: 5,
             },
         };
@@ -661,7 +661,7 @@ mod tests {
         let input = Instruction::Group6 {
             op: Opecode6::Bnz,
             address: Address::Unresolved {
-                symbol_name: String::from("TEST2"),
+                symbol_name: "TEST2",
                 offset: -3,
             },
         };
@@ -675,7 +675,7 @@ mod tests {
         let input = Instruction::Group6 {
             op: Opecode6::Bnm,
             address: Address::Unresolved {
-                symbol_name: String::from("TEST3"),
+                symbol_name: "TEST3",
                 offset: 9,
             },
         };

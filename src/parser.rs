@@ -6,19 +6,19 @@ use chumsky::Stream;
 use logos::Span;
 
 #[derive(Debug, Hash, PartialEq)]
-pub struct Ast {
-    pub title: String,
-    pub lines: Vec<ProgramLine>,
+pub struct Ast<'a> {
+    pub title: &'a str,
+    pub lines: Vec<ProgramLine<'a>>,
 }
 
-#[derive(Debug, Hash, PartialEq)]
-pub struct ProgramLine {
-    pub label: Option<String>,
-    pub instruction: Option<Instruction>,
+#[derive(Clone, Debug, Hash, PartialEq)]
+pub struct ProgramLine<'a> {
+    pub label: Option<&'a str>,
+    pub instruction: Option<Instruction<'a>>,
 }
 
-fn parser<'a>() -> impl Parser<Token<'a>, Ast, Error = Simple<Token<'a>>> {
-    let string = select! { Token::String(s) => s.to_string() };
+fn parser<'a>() -> impl Parser<Token<'a>, Ast<'a>, Error = Simple<Token<'a>>> {
+    let string = select! { Token::String(s) => s };
     let decimal = select! { Token::Decimal(d) => d };
     let unsigned_integer = select! {
         Token::Decimal(d) => d,
@@ -255,7 +255,7 @@ fn parser<'a>() -> impl Parser<Token<'a>, Ast, Error = Simple<Token<'a>>> {
                     Token::Decimal(d) => MachineAddress::from_str_radix(&d.to_string(), 16).unwrap(),
                     Token::NoPrefixHexadecimal(h) => h,
                 }.or(
-                    string.try_map(|s, span| MachineAddress::from_str_radix(&s, 16)
+                    string.try_map(|s, span| MachineAddress::from_str_radix(s, 16)
                     .map_err(|e| Simple::custom(span, format!("{e}"))))
                 ))
                 .map(Instruction::Org)
@@ -397,7 +397,7 @@ mod tests {
         ];
         let expected = (
             Some(Ast {
-                title: String::from("test_op1"),
+                title: "test_op1",
                 lines: vec![
                     ProgramLine {
                         label: None,
@@ -513,7 +513,7 @@ mod tests {
         ];
         let expected = (
             Some(Ast {
-                title: String::from("test_op2"),
+                title: "test_op2",
                 lines: vec![
                     ProgramLine {
                         label: None,
@@ -581,7 +581,7 @@ mod tests {
         ];
         let expected = (
             Some(Ast {
-                title: String::from("test_op3"),
+                title: "test_op3",
                 lines: vec![
                     ProgramLine {
                         label: None,
@@ -658,7 +658,7 @@ mod tests {
         ];
         let expected = (
             Some(Ast {
-                title: String::from("test_op4"),
+                title: "test_op4",
                 lines: vec![
                     ProgramLine {
                         label: None,
@@ -724,7 +724,7 @@ mod tests {
         ];
         let expected = (
             Some(Ast {
-                title: String::from("test_op5"),
+                title: "test_op5",
                 lines: vec![
                     ProgramLine {
                         label: None,
@@ -740,7 +740,7 @@ mod tests {
                             op: Opecode5::St,
                             rb: Register::One,
                             address: Address::Unresolved {
-                                symbol_name: String::from("Label1"),
+                                symbol_name: "Label1",
                                 offset: 12,
                             },
                         }),
@@ -823,7 +823,7 @@ mod tests {
         ];
         let expected = (
             Some(Ast {
-                title: String::from("test_op6"),
+                title: "test_op6",
                 lines: vec![
                     ProgramLine {
                         label: None,
@@ -837,7 +837,7 @@ mod tests {
                         instruction: Some(Instruction::Group6 {
                             op: Opecode6::Bp,
                             address: Address::Unresolved {
-                                symbol_name: String::from("Label1"),
+                                symbol_name: "Label1",
                                 offset: 12,
                             },
                         }),
@@ -854,7 +854,7 @@ mod tests {
                         instruction: Some(Instruction::Group6 {
                             op: Opecode6::Bm,
                             address: Address::Unresolved {
-                                symbol_name: String::from("Label2"),
+                                symbol_name: "Label2",
                                 offset: 0,
                             },
                         }),
@@ -871,7 +871,7 @@ mod tests {
                         instruction: Some(Instruction::Group6 {
                             op: Opecode6::Bnp,
                             address: Address::Unresolved {
-                                symbol_name: String::from("Label3"),
+                                symbol_name: "Label3",
                                 offset: -78,
                             },
                         }),
@@ -888,7 +888,7 @@ mod tests {
                         instruction: Some(Instruction::Group6 {
                             op: Opecode6::Bnm,
                             address: Address::Unresolved {
-                                symbol_name: String::from("Label4"),
+                                symbol_name: "Label4",
                                 offset: 90,
                             },
                         }),
@@ -905,7 +905,7 @@ mod tests {
                         instruction: Some(Instruction::Group6 {
                             op: Opecode6::B,
                             address: Address::Unresolved {
-                                symbol_name: String::from("Label5"),
+                                symbol_name: "Label5",
                                 offset: 0,
                             },
                         }),
@@ -922,7 +922,7 @@ mod tests {
                         instruction: Some(Instruction::Group6 {
                             op: Opecode6::Bsr,
                             address: Address::Unresolved {
-                                symbol_name: String::from("Label6"),
+                                symbol_name: "Label6",
                                 offset: -56,
                             },
                         }),
@@ -951,7 +951,7 @@ mod tests {
         ];
         let expected = (
             Some(Ast {
-                title: String::from("test_op7"),
+                title: "test_op7",
                 lines: vec![
                     ProgramLine {
                         label: None,
@@ -991,7 +991,7 @@ mod tests {
         ];
         let expected = (
             Some(Ast {
-                title: String::from("test_op8"),
+                title: "test_op8",
                 lines: vec![
                     ProgramLine {
                         label: None,
@@ -1045,7 +1045,7 @@ mod tests {
         ];
         let expected = (
             Some(Ast {
-                title: String::from("test_op9"),
+                title: "test_op9",
                 lines: vec![
                     ProgramLine {
                         label: None,
@@ -1065,7 +1065,7 @@ mod tests {
                         label: None,
                         instruction: Some(Instruction::Dc {
                             value: 0,
-                            unresolved_symbol: Some(String::from("Label0")),
+                            unresolved_symbol: Some("Label0"),
                         }),
                     },
                     ProgramLine {
@@ -1112,17 +1112,17 @@ mod tests {
         ];
         let expected = (
             Some(Ast {
-                title: String::from("test_op7"),
+                title: "test_op7",
                 lines: vec![
                     ProgramLine {
-                        label: Some(String::from("Label1")),
+                        label: Some("Label1"),
                         instruction: Some(Instruction::Group7 {
                             op: Opecode7::Rio,
                             device: Device::Cr,
                         }),
                     },
                     ProgramLine {
-                        label: Some(String::from("Label2")),
+                        label: Some("Label2"),
                         instruction: Some(Instruction::Group7 {
                             op: Opecode7::Wio,
                             device: Device::Lpt,
@@ -1164,7 +1164,7 @@ mod tests {
         ];
         let expected = (
             Some(Ast {
-                title: String::from("test_op7"),
+                title: "test_op7",
                 lines: vec![
                     ProgramLine {
                         label: None,

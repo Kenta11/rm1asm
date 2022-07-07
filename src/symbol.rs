@@ -3,9 +3,9 @@ use crate::parser;
 
 use std::collections::HashMap;
 
-type SymbolTable = HashMap<String, MachineAddress>;
+type SymbolTable<'a> = HashMap<&'a str, MachineAddress>;
 
-fn create_symbol_table(lines: &Vec<parser::ProgramLine>) -> SymbolTable {
+fn create_symbol_table<'a>(lines: &'a Vec<parser::ProgramLine>) -> SymbolTable<'a> {
     let mut symbol_table = SymbolTable::new();
 
     let mut address: MachineAddress = 0;
@@ -17,7 +17,7 @@ fn create_symbol_table(lines: &Vec<parser::ProgramLine>) -> SymbolTable {
 
             if let Some(label) = &line.label {
                 if !symbol_table.contains_key(label) {
-                    symbol_table.entry(String::from(label)).or_insert(address);
+                    symbol_table.entry(label).or_insert(address);
                 }
             }
 
@@ -37,8 +37,10 @@ fn create_symbol_table(lines: &Vec<parser::ProgramLine>) -> SymbolTable {
 }
 
 pub fn resolve_symbols(lines: &mut Vec<parser::ProgramLine>) {
-    let symbol_table = create_symbol_table(lines);
+    let tmp: Vec<parser::ProgramLine> = (*lines).clone();
+    let symbol_table = create_symbol_table(&tmp);
     let mut current_address: MachineAddress = 0;
+
     for line in lines {
         if let Some(instruction) = &mut line.instruction {
             if let Instruction::Org(a) = instruction {
@@ -102,8 +104,8 @@ pub fn resolve_symbols(lines: &mut Vec<parser::ProgramLine>) {
     }
 }
 
-pub fn check_unresolve_symbols(lines: &Vec<parser::ProgramLine>) -> Vec<String> {
-    let mut unresolved_symbols = Vec::<String>::new();
+pub fn check_unresolve_symbols<'a>(lines: &'a Vec<parser::ProgramLine>) -> Vec<&'a str> {
+    let mut unresolved_symbols = Vec::<&str>::new();
 
     for line in lines {
         if let Some(instruction) = &line.instruction {
@@ -118,7 +120,7 @@ pub fn check_unresolve_symbols(lines: &Vec<parser::ProgramLine>) -> Vec<String> 
                         },
                 } => {
                     if !unresolved_symbols.contains(symbol_name) {
-                        unresolved_symbols.push(String::from(symbol_name));
+                        unresolved_symbols.push(symbol_name);
                     }
                 }
                 Instruction::Group6 {
@@ -130,7 +132,7 @@ pub fn check_unresolve_symbols(lines: &Vec<parser::ProgramLine>) -> Vec<String> 
                         },
                 } => {
                     if !unresolved_symbols.contains(symbol_name) {
-                        unresolved_symbols.push(String::from(symbol_name));
+                        unresolved_symbols.push(symbol_name);
                     }
                 }
                 Instruction::Dc {
@@ -138,7 +140,7 @@ pub fn check_unresolve_symbols(lines: &Vec<parser::ProgramLine>) -> Vec<String> 
                     unresolved_symbol: Some(symbol_name),
                 } => {
                     if !unresolved_symbols.contains(symbol_name) {
-                        unresolved_symbols.push(String::from(symbol_name));
+                        unresolved_symbols.push(symbol_name);
                     }
                 }
                 _ => {}
