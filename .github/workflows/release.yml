@@ -1,0 +1,290 @@
+name: release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+env:
+  APP_NAME: 'rm1asm'
+  MAINTAINER: 'Kenta11'
+  DESC: 'The MICRO-1 assembler written in Rust.'
+
+jobs:
+  build-on-Linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install stable
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+      - name: Build the binary and a manual
+        run: |
+          sudo apt install -y pandoc
+          sudo pip install jinja2 toml
+
+          make target/man/${{ env.APP_NAME }}.1
+          cargo build --release
+      - uses: actions/upload-artifact@v3
+        with:
+          name: the-files-for-linux
+          path: |
+            target/man/${{ env.APP_NAME }}.1
+            target/release/${{ env.APP_NAME }}
+
+  compress-on-Linux:
+    runs-on: ubuntu-latest
+    needs: build-on-Linux
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/download-artifact@v3
+        with:
+          name: the-files-for-linux
+      - name: Create the tarball
+        run: |
+          os="${{ runner.os }}"
+          assets="${{ env.APP_NAME }}_$(echo "${{ runner.os }}" | tr '[:upper:]' '[:lower:]')"
+
+          mkdir -p $assets
+          cp -r release/${{ env.APP_NAME }} completions LICENSE README.md $assets/
+          tar zcf "$assets.tar.gz" "$assets"
+          ls -ahl *.*
+        shell: bash
+      - uses: actions/upload-artifact@v3
+        with:
+          name: artifact-ubuntu-latest
+          path: |
+            *.tar.gz
+
+  compress-on-Win-and-macOS:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os:
+          - windows-latest
+          - macOS-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install stable
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+      - name: Create the tarball
+        run: |
+          os="${{ runner.os }}"
+          assets="${{ env.APP_NAME }}_$(echo "${{ runner.os }}" | tr '[:upper:]' '[:lower:]')"
+
+          cargo build --release
+          mkdir -p $assets
+          cp target/release/${{ env.APP_NAME }} LICENSE README.md $assets/
+          (
+            if [[ "${{ runner.os }}" == Windows ]]; then
+              7z a "$assets.zip" "$assets"
+            else
+              cp -r completions "$assets"
+              tar zcf "$assets.tar.gz" "$assets"
+            fi
+            ls -ahl *.*
+          )
+        shell: bash
+      - uses: actions/upload-artifact@v3
+        with:
+          name: artifact-${{ matrix.os }}
+          path: |
+            *.tar.gz
+            *.zip
+
+  create-deb-package:
+    runs-on: ubuntu-latest
+    needs: build-on-Linux
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/download-artifact@v3
+        with:
+          name: the-files-for-linux
+      - name: Create the package
+        run: |
+          mkdir -p target/debpkg/usr/bin target/debpkg/usr/share/{man/man1,bash-completion/completions,zsh/site-functions,licenses/${{ env.APP_NAME }}}
+          cp release/${{ env.APP_NAME }} target/debpkg/usr/bin/
+          cp man/${{ env.APP_NAME }}.1 target/debpkg/usr/share/man/man1/
+          cp completions/${{ env.APP_NAME }} target/debpkg/usr/share/bash-completion/completions/
+          cp completions/_${{ env.APP_NAME }} target/debpkg/usr/share/zsh/site-functions/
+          cp LICENSE target/debpkg/usr/share/licenses/${{ env.APP_NAME }}/
+      - uses: jiro4989/build-deb-action@v2
+        with:
+          package: ${{ env.APP_NAME }}
+          package_root: target/debpkg
+          maintainer: Kenta Arai
+          version: ${{ github.ref }}
+          arch: 'amd64'
+          depends: 'libc6 (>= 2.2.1)'
+          desc: 'MICRO-1 assembler written in Rust'
+      - uses: actions/upload-artifact@v3
+        with:
+          name: artifact-deb
+          path: |
+            *.deb
+
+  create-rpm-package:
+    runs-on: ubuntu-latest
+    needs: build-on-Linux
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/download-artifact@v3
+        with:
+          name: the-files-for-linux
+      - name: Create the package
+        run: |
+          mkdir -p target/rpmpkg/usr/bin target/rpmpkg/usr/share/{man/man1,bash-completion/completions,zsh/site-functions,licenses/${{ env.APP_NAME }}}
+          cp release/${{ env.APP_NAME }} target/rpmpkg/usr/bin/
+          # cp man/${{ env.APP_NAME }}.1 target/rpmpkg/usr/share/man/man1/
+          cp completions/${{ env.APP_NAME }} target/rpmpkg/usr/share/bash-completion/completions/
+          cp completions/_${{ env.APP_NAME }} target/rpmpkg/usr/share/zsh/site-functions/
+          cp LICENSE target/rpmpkg/usr/share/licenses/${{ env.APP_NAME }}/
+      - uses: jiro4989/build-rpm-action@v2
+        with:
+          summary: 'MICRO-1 assembler'
+          package: rm1asm
+          package_root: target/rpmpkg
+          maintainer: Kenta Arai
+          version: ${{ github.ref }}
+          arch: 'x86_64'
+          desc: 'MICRO-1 assembler written in Rust'
+      - uses: actions/upload-artifact@v3
+        with:
+          name: artifact-rpm
+          path: |
+            *.rpm
+
+  create-pkg-package:
+    runs-on: ubuntu-latest
+    container: archlinux
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup environment
+        run: |
+          pacman -Syuu --noconfirm
+          pacman -S base-devel make pandoc python python-pip --noconfirm
+          pip install jinja2 toml
+          mkdir -p /github/home
+      - name: Fix the permission
+        run: |
+          echo "nobody ALL=(ALL) NOPASSWD: /usr/bin/pacman" >> /etc/sudoers
+          chown -R nobody .
+          chmod -R 777 /github
+      - name: Create the package
+        run: |
+          su nobody --pty -p -s /bin/bash -c 'curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs > install.sh; yes 1 | sh install.sh -y; source $HOME/.cargo/env; makepkg'
+      - uses: actions/upload-artifact@v3
+        with:
+          name: artifact-zst
+          path: |
+            *.pkg.tar.zst
+
+  create-release:
+    runs-on: ubuntu-latest
+    needs:
+      - compress-on-Linux
+      - compress-on-Win-and-macOS
+      - create-deb-package
+      - create-rpm-package
+      - create-pkg-package
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Generate changelog
+        run: |
+          wget https://github.com/git-chglog/git-chglog/releases/download/0.9.1/git-chglog_linux_amd64 -O git-chglog
+          chmod +x git-chglog
+          ./git-chglog --output ./changelog $(git describe --tags $(git rev-list --tags --max-count=1))
+      - name: Create Release
+        id: create-release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: ${{ github.ref }}
+          body_path: ./changelog
+          draft: false
+          prerelease: false
+      - name: Write upload_url to file
+        run: echo '${{ steps.create-release.outputs.upload_url }}' > upload_url.txt
+      - uses: actions/upload-artifact@v3
+        with:
+          name: create-release
+          path: upload_url.txt
+
+  upload-tarballs:
+    runs-on: ubuntu-latest
+    needs: create-release
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            asset_name_suffix: linux.tar.gz
+            asset_content_type: application/gzip
+          - os: windows-latest
+            asset_name_suffix: windows.zip
+            asset_content_type: application/zip
+          - os: macOS-latest
+            asset_name_suffix: macos.tar.gz
+            asset_content_type: application/gzip
+    steps:
+      - uses: actions/download-artifact@v3
+        with:
+          name: artifact-${{ matrix.os }}
+      - uses: actions/download-artifact@v3
+        with:
+          name: create-release
+      - id: vars
+        run: |
+          echo "::set-output name=upload_url::$(cat upload_url.txt)"
+      - name: Upload Release Asset
+        id: upload-release-asset 
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.vars.outputs.upload_url }}
+          asset_path: ${{ env.APP_NAME }}_${{ matrix.asset_name_suffix }}
+          asset_name: ${{ env.APP_NAME }}_${{ matrix.asset_name_suffix }}
+          asset_content_type: ${{ matrix.asset_content_type }}
+
+  upload-linux-packages:
+    runs-on: ubuntu-latest
+    needs: create-release
+    strategy:
+      matrix:
+        include:
+          - pkg: deb
+            asset_content_type: application/vnd.debian.binary-package
+          - pkg: rpm
+            asset_content_type: application/x-rpm
+          - pkg: zst
+            asset_content_type: application/octet-stream
+    steps:
+      - uses: actions/download-artifact@v3
+        with:
+          name: artifact-${{ matrix.pkg }}
+      - uses: actions/download-artifact@v3
+        with:
+          name: create-release
+      - id: vars
+        run: |
+          echo "::set-output name=upload_url::$(cat upload_url.txt)"
+          echo "::set-output name=asset_name::$(ls *.${{ matrix.pkg }} | head -n 1)"
+      - name: Upload Release Asset
+        id: upload-release-asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.vars.outputs.upload_url }}
+          asset_path: ${{ steps.vars.outputs.asset_name }}
+          asset_name: ${{ steps.vars.outputs.asset_name }}
+          asset_content_type: ${{ matrix.asset_content_type }}
