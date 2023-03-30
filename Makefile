@@ -1,4 +1,4 @@
-.PHONY: check documents test clean
+.PHONY: check documents test release clean
 
 check:
 	cargo check
@@ -23,6 +23,11 @@ PKGBUILD: Cargo.toml script/build-a-file.py script/templates/PKGBUILD
 test:
 	cargo test
 	./script/test.sh
+
+release:
+	make test
+	make README.md
+	cargo publish
 
 clean:
 	rm -rf README.md target PKGBUILD
