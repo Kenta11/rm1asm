@@ -9,7 +9,7 @@
 
 ```
 $ rm1asm --help
-rm1asm 1.0.1
+rm1asm 1.0.2
 MICRO-1 machine language assembler written in Rust
 
 USAGE:
@@ -31,20 +31,20 @@ ARGS:
 ### Cargo
 
 ```
-cargo install --git https://github.com/Kenta11/rm1asm
+cargo install rm1asm
 ```
 
 ### Packages
 
-- Debian: https://github.com/Kenta11/rm1asm/releases/download/v1.0.1/rm1asm_1.0.1_amd64.deb
-- RedHat: https://github.com/Kenta11/rm1asm/releases/download/v1.0.1/rm1asm-1.0.1-1.el7.x86_64.rpm
-- Arch Linux: https://github.com/Kenta11/rm1asm/releases/download/v1.0.1/rm1asm-1.0.1-1-x86_64.pkg.tar.zst
+- Debian: https://github.com/Kenta11/rm1asm/releases/download/v1.0.2/rm1asm_1.0.2_amd64.deb
+- RedHat: https://github.com/Kenta11/rm1asm/releases/download/v1.0.2/rm1asm-1.0.2-1.el7.x86_64.rpm
+- Arch Linux: https://github.com/Kenta11/rm1asm/releases/download/v1.0.2/rm1asm-1.0.2-1-x86_64.pkg.tar.zst
 
 ### Tarbolls
 
-- Windows (x64): https://github.com/Kenta11/rm1asm/releases/download/v1.0.1/rm1asm_windows.zip
-- Linux (x64): https://github.com/Kenta11/rm1asm/releases/download/v1.0.1/rm1asm_linux.tar.gz
-- macOS (x64): https://github.com/Kenta11/rm1asm/releases/download/v1.0.1/rm1asm_macos.tar.gz
+- Windows (x64): https://github.com/Kenta11/rm1asm/releases/download/v1.0.2/rm1asm_windows.zip
+- Linux (x64): https://github.com/Kenta11/rm1asm/releases/download/v1.0.2/rm1asm_linux.tar.gz
+- macOS (x64): https://github.com/Kenta11/rm1asm/releases/download/v1.0.2/rm1asm_macos.tar.gz
 
 ## Reference
 

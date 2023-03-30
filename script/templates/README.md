@@ -16,7 +16,7 @@ $ rm1asm --help
 ### Cargo
 
 ```
-cargo install --git https://github.com/Kenta11/rm1asm
+cargo install rm1asm
 ```
 
 ### Packages
