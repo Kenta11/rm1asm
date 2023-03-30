@@ -66,7 +66,7 @@ impl From<&Opecode2> for MachineCode {
     fn from(from: &Opecode2) -> Self {
         (match from {
             Opecode2::Lc => (0x9 << 2) + 3,
-            Opecode2::Push => (0xD << 2),
+            Opecode2::Push => 0xD << 2,
             Opecode2::Pop => (0xD << 2) + 1,
         }) << 10
     }
@@ -83,7 +83,7 @@ pub enum Opecode3 {
 impl From<&Opecode3> for MachineCode {
     fn from(from: &Opecode3) -> Self {
         (match from {
-            Opecode3::Sl => (0x5 << 2),
+            Opecode3::Sl => 0x5 << 2,
             Opecode3::Sa => (0x5 << 2) + 1,
             Opecode3::Sc => (0x5 << 2) + 2,
             Opecode3::Bix => (0xD << 2) + 2,
@@ -118,7 +118,7 @@ pub enum Opecode5 {
 impl From<&Opecode5> for MachineCode {
     fn from(from: &Opecode5) -> Self {
         (match from {
-            Opecode5::L => (0x9 << 2),
+            Opecode5::L => 0x9 << 2,
             Opecode5::St => (0x9 << 2) + 1,
             Opecode5::La => (0x9 << 2) + 2,
         }) << 10
@@ -145,7 +145,7 @@ impl From<&Opecode6> for MachineCode {
     fn from(from: &Opecode6) -> Self {
         (match from {
             Opecode6::Bdis => (0xD << 4) + (3 << 2),
-            Opecode6::Bp => (0xE << 4),
+            Opecode6::Bp => 0xE << 4,
             Opecode6::Bz => (0xE << 4) + 1,
             Opecode6::Bm => (0xE << 4) + 2,
             Opecode6::Bc => (0xE << 4) + 3,
