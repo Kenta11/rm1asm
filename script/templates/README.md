@@ -39,6 +39,7 @@ cargo install rm1asm
 
 - simulator: [m1sim](https://github.com/kaien3/micro1)
 - micro assembler: [rm1masm](https://github.com/Kenta11/rm1masm)
+- cpu: [micro-alpha](https://github.com/Kenta11/micro-alpha)
 
 ## License
 
